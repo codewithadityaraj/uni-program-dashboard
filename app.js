@@ -413,16 +413,16 @@ function renderCardsSection(prefix, rawData) {
   let rows = filterByProgram(rawData);
 
   // Filter by local cohort filter if cohort-based
-  if (prefix === 'tc') {
-    const cohVal = sectionCohortFilters.tc;
+  if (prefix === 'tc' || prefix === 'fc') {
+    const cohVal = sectionCohortFilters[prefix];
     if (cohVal !== 'ALL') {
       rows = rows.filter(r => r.cohort === cohVal);
     }
   }
 
   // Filter by local month filter if month-based
-  if (prefix === 'tm') {
-    const monVal = sectionMonthFilters.tm;
+  if (prefix === 'tm' || prefix === 'fm') {
+    const monVal = sectionMonthFilters[prefix];
     if (monVal !== 'ALL') {
       rows = rows.filter(r => r.month === monVal);
     }
@@ -449,41 +449,6 @@ function renderCardsSection(prefix, rawData) {
   setProgress(`prog-${prefix}-revpct`, revPct, progressColor(revPct));
 }
 
-function renderLargeCardsSection(prefix, rawData) {
-  let rows = filterByProgram(rawData);
-
-  if (prefix === 'fc') {
-    const cohVal = sectionCohortFilters.fc;
-    if (cohVal !== 'ALL') {
-      rows = rows.filter(r => r.cohort === cohVal);
-    }
-  }
-
-  if (prefix === 'fm') {
-    const monVal = sectionMonthFilters.fm;
-    if (monVal !== 'ALL') {
-      rows = rows.filter(r => r.month === monVal);
-    }
-  }
-
-  const agg = aggregateData(rows);
-
-  const achPct = parseFloat(pct(agg.cohortAch, agg.cohortTarget));
-  const revPct = parseFloat(pct(agg.revAch, agg.revTarget));
-
-  setText(`card-${prefix}-ach`,    fmt(agg.cohortAch));
-  setText(`card-${prefix}-revach`, fmtRs(agg.revAch));
-
-  setText(`lbl-${prefix}-sub`,    `Goal: ${fmt(agg.cohortTarget)}`);
-  setText(`lbl-${prefix}-revsub`, `Goal: ${fmtRs(agg.revTarget)}`);
-
-  setTrend(`trend-${prefix}-ach`, achPct - 75);
-  setTrend(`trend-${prefix}-rev`, revPct - 70);
-
-  setProgress(`prog-${prefix}-ach`, achPct, progressColor(achPct));
-  setProgress(`prog-${prefix}-rev`, revPct, progressColor(revPct));
-}
-
 // ── GLOBAL LAYOUT ORCHESTRATOR ────────────────────
 function render() {
   // Render Section 1: Token Cohort Wise (6 Cards)
@@ -492,11 +457,11 @@ function render() {
   // Render Section 2: Token Monthly Wise (6 Cards)
   renderCardsSection('tm', MOCK_TOKEN_MONTH_RAW);
 
-  // Render Section 3: Full Payment Cohort Wise (2 Large Cards)
-  renderLargeCardsSection('fc', MOCK_FP_COHORT_RAW);
+  // Render Section 3: Full Payment Cohort Wise (6 Cards)
+  renderCardsSection('fc', MOCK_FP_COHORT_RAW);
 
-  // Render Section 4: Full Payment Monthly Wise (2 Large Cards)
-  renderLargeCardsSection('fm', MOCK_FP_MONTH_RAW);
+  // Render Section 4: Full Payment Monthly Wise (6 Cards)
+  renderCardsSection('fm', MOCK_FP_MONTH_RAW);
 
   // Render Section 5: TL Wise Analytics (4 list lines)
   renderLeadershipList('tl-tc');
@@ -522,7 +487,7 @@ function onSectionCohortChange(prefix, value) {
   if (prefix === 'tc') {
     renderCardsSection('tc', MOCK_TOKEN_COHORT_RAW);
   } else {
-    renderLargeCardsSection('fc', MOCK_FP_COHORT_RAW);
+    renderCardsSection('fc', MOCK_FP_COHORT_RAW);
   }
 }
 
@@ -531,7 +496,7 @@ function onSectionMonthChange(prefix, value) {
   if (prefix === 'tm') {
     renderCardsSection('tm', MOCK_TOKEN_MONTH_RAW);
   } else {
-    renderLargeCardsSection('fm', MOCK_FP_MONTH_RAW);
+    renderCardsSection('fm', MOCK_FP_MONTH_RAW);
   }
 }
 

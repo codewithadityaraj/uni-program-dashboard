@@ -393,49 +393,130 @@
           </select>
         </div>
 
-        <div class="kpi-cards-grid-large">
-          <!-- Total Enrollment -->
-          <div class="kpi-card kpi-card-large accent-teal">
+        <div class="kpi-cards-grid">
+          <!-- Enrollment Target -->
+          <div class="kpi-card accent-indigo">
             <div class="card-header-row">
-              <span class="card-label">Total Enrollment</span>
+              <span class="card-label">Enrollment Target</span>
               <div class="card-icon">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fc-tgt">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Total enrollment target</span>
+            </div>
+          </div>
+
+          <!-- Enrollment Achieved -->
+          <div class="kpi-card accent-green">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Achieved</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
             </div>
             <div class="card-value" id="card-fc-ach">—</div>
             <div class="card-footer">
-              <span class="card-subtext" id="lbl-fc-sub">Goal: —</span>
+              <span class="card-subtext">Students enrolled</span>
               <span class="trend-badge" id="trend-fc-ach">—</span>
             </div>
-            <div class="card-progress-wrap" style="margin-top: 8px;">
+            <div class="card-progress-wrap">
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-fc-ach" style="width: 0%"></div>
               </div>
             </div>
           </div>
 
-          <!-- Total Revenue -->
-          <div class="kpi-card kpi-card-large accent-purple">
+          <!-- Enrollment Achivement % -->
+          <div class="kpi-card accent-teal">
             <div class="card-header-row">
-              <span class="card-label">Total Revenue</span>
+              <span class="card-label">Enrollment Achivement %</span>
               <div class="card-icon">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="2" y="5" width="20" height="14" rx="2" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fc-pct">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Average conversion rate</span>
+            </div>
+            <div class="card-progress-wrap">
+              <div class="card-progress-track">
+                <div class="card-progress-fill" id="prog-fc-pct" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Target -->
+          <div class="kpi-card accent-indigo">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Target</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fc-revtgt">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Aggregated revenue goals</span>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Achieved -->
+          <div class="kpi-card accent-purple">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Achieved</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
                 </svg>
               </div>
             </div>
             <div class="card-value" id="card-fc-revach">—</div>
             <div class="card-footer">
-              <span class="card-subtext" id="lbl-fc-revsub">Goal: —</span>
+              <span class="card-subtext">Revenue collected</span>
               <span class="trend-badge" id="trend-fc-rev">—</span>
             </div>
-            <div class="card-progress-wrap" style="margin-top: 8px;">
+            <div class="card-progress-wrap">
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-fc-rev" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Achivement % -->
+          <div class="kpi-card accent-amber">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Achivement %</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fc-revpct">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Average revenue quota met</span>
+            </div>
+            <div class="card-progress-wrap">
+              <div class="card-progress-track">
+                <div class="card-progress-fill" id="prog-fc-revpct" style="width: 0%"></div>
               </div>
             </div>
           </div>
@@ -460,49 +541,130 @@
           </select>
         </div>
 
-        <div class="kpi-cards-grid-large">
-          <!-- Total Enrollment -->
-          <div class="kpi-card kpi-card-large accent-teal">
+        <div class="kpi-cards-grid">
+          <!-- Enrollment Target -->
+          <div class="kpi-card accent-indigo">
             <div class="card-header-row">
-              <span class="card-label">Total Enrollment</span>
+              <span class="card-label">Enrollment Target</span>
               <div class="card-icon">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fm-tgt">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Total enrollment target</span>
+            </div>
+          </div>
+
+          <!-- Enrollment Achieved -->
+          <div class="kpi-card accent-green">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Achieved</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
             </div>
             <div class="card-value" id="card-fm-ach">—</div>
             <div class="card-footer">
-              <span class="card-subtext" id="lbl-fm-sub">Goal: —</span>
+              <span class="card-subtext">Students enrolled</span>
               <span class="trend-badge" id="trend-fm-ach">—</span>
             </div>
-            <div class="card-progress-wrap" style="margin-top: 8px;">
+            <div class="card-progress-wrap">
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-fm-ach" style="width: 0%"></div>
               </div>
             </div>
           </div>
 
-          <!-- Total Revenue -->
-          <div class="kpi-card kpi-card-large accent-purple">
+          <!-- Enrollment Achivement % -->
+          <div class="kpi-card accent-teal">
             <div class="card-header-row">
-              <span class="card-label">Total Revenue</span>
+              <span class="card-label">Enrollment Achivement %</span>
               <div class="card-icon">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="2" y="5" width="20" height="14" rx="2" />
-                  <line x1="2" y1="10" x2="22" y2="10" />
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fm-pct">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Average conversion rate</span>
+            </div>
+            <div class="card-progress-wrap">
+              <div class="card-progress-track">
+                <div class="card-progress-fill" id="prog-fm-pct" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Target -->
+          <div class="kpi-card accent-indigo">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Target</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fm-revtgt">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Aggregated revenue goals</span>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Achieved -->
+          <div class="kpi-card accent-purple">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Achieved</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
                 </svg>
               </div>
             </div>
             <div class="card-value" id="card-fm-revach">—</div>
             <div class="card-footer">
-              <span class="card-subtext" id="lbl-fm-revsub">Goal: —</span>
+              <span class="card-subtext">Revenue collected</span>
               <span class="trend-badge" id="trend-fm-rev">—</span>
             </div>
-            <div class="card-progress-wrap" style="margin-top: 8px;">
+            <div class="card-progress-wrap">
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-fm-rev" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollment Revenue Achivement % -->
+          <div class="kpi-card accent-amber">
+            <div class="card-header-row">
+              <span class="card-label">Enrollment Revenue Achivement %</span>
+              <div class="card-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </div>
+            </div>
+            <div class="card-value" id="card-fm-revpct">—</div>
+            <div class="card-footer">
+              <span class="card-subtext">Average revenue quota met</span>
+            </div>
+            <div class="card-progress-wrap">
+              <div class="card-progress-track">
+                <div class="card-progress-fill" id="prog-fm-revpct" style="width: 0%"></div>
               </div>
             </div>
           </div>
