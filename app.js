@@ -59,7 +59,7 @@ function uniqueSorted(values) { return [...new Set(values.filter(Boolean))].sort
 function escapeHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function setLoading(loading) { document.body.classList.toggle('is-loading', loading); }
 
-function fmtLakhExact(val) {
+function fmtCroreExact(val) {
   if (val == null) return '—';
   const raw = String(val).trim();
   if (!raw) return '—';
@@ -67,7 +67,7 @@ function fmtLakhExact(val) {
   if (!cleaned || cleaned === '-' || cleaned === '.') return '—';
   const num = parseFloat(cleaned);
   if (!Number.isFinite(num)) return '—';
-  return '₹' + (num / 100000).toLocaleString('en-IN', { maximumFractionDigits: 20 }) + 'L';
+  return '₹' + (num / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + 'Cr';
 }
 
 async function fetchDashboard(forceRefresh) {
@@ -107,13 +107,13 @@ function aggregateRows(rows, fields) {
   rows.forEach((row) => { cohortTarget += parseNum(row[fields.cohortTarget]); cohortAch += parseNum(row[fields.cohortAch]); revTarget += parseNum(row[fields.revTarget]); revAch += parseNum(row[fields.revAch]); });
   const achPctNum = cohortTarget ? (cohortAch / cohortTarget) * 100 : 0;
   const revPctNum = revTarget ? (revAch / revTarget) * 100 : 0;
-  return { cohortTarget: fmtNumExact(cohortTarget), cohortAch: fmtNumExact(cohortAch), achPct: fmtNumExact(achPctNum) + '%', revTarget: fmtLakhExact(revTarget), revAch: fmtLakhExact(revAch), revPct: fmtNumExact(revPctNum) + '%', achPctNum, revPctNum };
+  return { cohortTarget: fmtNumExact(cohortTarget), cohortAch: fmtNumExact(cohortAch), achPct: fmtNumExact(achPctNum) + '%', revTarget: fmtCroreExact(revTarget), revAch: fmtCroreExact(revAch), revPct: fmtNumExact(revPctNum) + '%', achPctNum, revPctNum };
 }
 
 function metricsFromSingleRow(row, fields) {
   const achPctNum = parsePct(row[fields.achPct]);
   const revPctNum = parsePct(row[fields.revPct]);
-  return { cohortTarget: displayRaw(row[fields.cohortTarget]), cohortAch: displayRaw(row[fields.cohortAch]), achPct: displayRaw(row[fields.achPct]), revTarget: fmtLakhExact(row[fields.revTarget]), revAch: fmtLakhExact(row[fields.revAch]), revPct: displayRaw(row[fields.revPct]), achPctNum: achPctNum != null ? achPctNum : 0, revPctNum: revPctNum != null ? revPctNum : 0 };
+  return { cohortTarget: displayRaw(row[fields.cohortTarget]), cohortAch: displayRaw(row[fields.cohortAch]), achPct: displayRaw(row[fields.achPct]), revTarget: fmtCroreExact(row[fields.revTarget]), revAch: fmtCroreExact(row[fields.revAch]), revPct: displayRaw(row[fields.revPct]), achPctNum: achPctNum != null ? achPctNum : 0, revPctNum: revPctNum != null ? revPctNum : 0 };
 }
 
 function renderCardsSection(prefix) {
