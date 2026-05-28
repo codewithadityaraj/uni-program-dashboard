@@ -312,16 +312,35 @@ html.dark .sticky-header {
   gap: 16px;
 }
 
+/* 3-card variant: always 3 columns on desktop, never collapses to 2 */
+.kpi-cards-grid--three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 @media (max-width: 1024px) {
   .kpi-cards-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+@media (max-width: 768px) {
+  .kpi-cards-grid--three {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
-  .kpi-cards-grid {
+  .kpi-cards-grid,
+  .kpi-cards-grid--three {
     grid-template-columns: 1fr;
   }
+}
+
+/* Team size value highlight inside card footer */
+.card-subtext > span {
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-secondary);
 }
 
 

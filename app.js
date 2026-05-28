@@ -8,8 +8,8 @@
 const API_BASE = '';
 
 const SECTION_CONFIG = {
-  tc: { dataset: 'tokenCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-tc-cohort', allLabel: 'All Cohorts', fields: { cohortTarget: 'Cohort Token Target', cohortAch: 'Cohort Token Achieved', achPct: 'Cohort Token Achievement %', revTarget: 'Cohort Token Revenue Target', revAch: 'Cohort Token Revenue Achieved', revPct: 'Cohort Token Revenue Achievement %' } },
-  tm: { dataset: 'tokenMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-tm-month', allLabel: 'All Months', fields: { cohortTarget: 'Month Token Target', cohortAch: 'Month Token Achieved', achPct: 'Month Token Achievement %', revTarget: 'Month Token Target Revenue', revAch: 'Month Token Revenue Achievement', revPct: 'Month Token Revenue Achievement %' } },
+  tc: { dataset: 'tokenCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-tc-cohort', allLabel: 'All Cohorts', teamSizeField: 'Present Active Team Size', fields: { cohortTarget: 'Cohort Token Target', cohortAch: 'Cohort Token Achieved', achPct: 'Cohort Token Achievement %', revTarget: 'Cohort Token Revenue Target', revAch: 'Cohort Token Revenue Achieved', revPct: 'Cohort Token Revenue Achievement %' } },
+  tm: { dataset: 'tokenMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-tm-month', allLabel: 'All Months', teamSizeField: 'Present Active Team Size', fields: { cohortTarget: 'Month Token Target', cohortAch: 'Month Token Achieved', achPct: 'Month Token Achievement %', revTarget: 'Month Token Target Revenue', revAch: 'Month Token Revenue Achievement', revPct: 'Month Token Revenue Achievement %' } },
   fc: { dataset: 'fpCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-fc-cohort', allLabel: 'All Cohorts', fields: { cohortTarget: 'Cohort Enrollment Target', cohortAch: 'Cohort Enrollment Acheived', achPct: 'Cohort Enrollment Acheivement %', revTarget: 'Cohort Enrollment Revenue Target', revAch: 'Cohort Enrollment Revenue Acheived', revPct: 'Cohort Enrollment Revenue Acheivement %' } },
   fm: { dataset: 'fpMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-fm-month', allLabel: 'All Months', fields: { cohortTarget: 'Month Enrollment Target', cohortAch: 'Month Enrollment Acheived', achPct: 'Month Enrollment Acheivement %', revTarget: 'Month Enrollment Revenue Target', revAch: 'Month Enrollment Revenue Acheived', revPct: 'Month Enrollment Revenue Acheivement %' } },
 };
@@ -120,16 +120,47 @@ function renderCardsSection(prefix) {
   if (!dataReady) return;
   const config = SECTION_CONFIG[prefix];
   const rows = getFilteredSectionRows(prefix);
+
+  // Sections tc and tm now have a reduced 3-card layout
+  const isTokenSection = prefix === 'tc' || prefix === 'tm';
+
   if (!rows.length) {
-    ['tgt', 'ach', 'pct', 'revtgt', 'revach', 'revpct'].forEach((k) => setText(`card-${prefix}-${k}`, '—'));
-    setTrend(`trend-${prefix}-ach`, 0); setTrend(`trend-${prefix}-rev`, 0);
-    setProgress(`prog-${prefix}-ach`, 0, 'accent-red'); setProgress(`prog-${prefix}-pct`, 0, 'accent-red'); setProgress(`prog-${prefix}-rev`, 0, 'accent-red'); setProgress(`prog-${prefix}-revpct`, 0, 'accent-red');
+    if (isTokenSection) {
+      setText(`card-${prefix}-ach`, '—'); setText(`card-${prefix}-revach`, '—');
+      setText(`card-${prefix}-avgtoken`, '—'); setText(`card-${prefix}-teamsize`, '—');
+      setTrend(`trend-${prefix}-ach`, 0); setTrend(`trend-${prefix}-rev`, 0);
+      setProgress(`prog-${prefix}-ach`, 0, 'accent-red'); setProgress(`prog-${prefix}-rev`, 0, 'accent-red');
+    } else {
+      ['tgt', 'ach', 'pct', 'revtgt', 'revach', 'revpct'].forEach((k) => setText(`card-${prefix}-${k}`, '—'));
+      setTrend(`trend-${prefix}-ach`, 0); setTrend(`trend-${prefix}-rev`, 0);
+      setProgress(`prog-${prefix}-ach`, 0, 'accent-red'); setProgress(`prog-${prefix}-pct`, 0, 'accent-red'); setProgress(`prog-${prefix}-rev`, 0, 'accent-red'); setProgress(`prog-${prefix}-revpct`, 0, 'accent-red');
+    }
     return;
   }
   const metrics = rows.length === 1 ? metricsFromSingleRow(rows[0], config.fields) : aggregateRows(rows, config.fields);
-  setText(`card-${prefix}-tgt`, metrics.cohortTarget); setText(`card-${prefix}-ach`, metrics.cohortAch); setText(`card-${prefix}-pct`, metrics.achPct); setText(`card-${prefix}-revtgt`, metrics.revTarget); setText(`card-${prefix}-revach`, metrics.revAch); setText(`card-${prefix}-revpct`, metrics.revPct);
-  setTrend(`trend-${prefix}-ach`, metrics.achPctNum - 75); setTrend(`trend-${prefix}-rev`, metrics.revPctNum - 70);
-  setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-pct`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-rev`, metrics.revPctNum, progressColor(metrics.revPctNum)); setProgress(`prog-${prefix}-revpct`, metrics.revPctNum, progressColor(metrics.revPctNum));
+
+  if (isTokenSection) {
+    // Compute team size and avg token per person
+    const teamSizeField = config.teamSizeField || 'Present Active Team Size';
+    let teamSize = 0;
+    rows.forEach((row) => { teamSize += parseNum(row[teamSizeField]); });
+    // If the sheet stores a single (non-aggregated) team size, use the last row's value instead of sum
+    // Use sum here (can be adjusted if the sheet has a single value per filter)
+    const cohortAchNum = rows.reduce((acc, row) => acc + parseNum(row[config.fields.cohortAch]), 0);
+    const avgToken = teamSize > 0 ? (cohortAchNum / teamSize) : 0;
+
+    setText(`card-${prefix}-ach`, metrics.cohortAch);
+    setText(`card-${prefix}-revach`, metrics.revAch);
+    setText(`card-${prefix}-avgtoken`, teamSize > 0 ? fmtNumExact(parseFloat(avgToken.toFixed(2))) : '—');
+    setText(`card-${prefix}-teamsize`, teamSize > 0 ? fmtNumExact(teamSize) : '—');
+    setTrend(`trend-${prefix}-ach`, metrics.achPctNum - 75); setTrend(`trend-${prefix}-rev`, metrics.revPctNum - 70);
+    setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum));
+    setProgress(`prog-${prefix}-rev`, metrics.revPctNum, progressColor(metrics.revPctNum));
+  } else {
+    setText(`card-${prefix}-tgt`, metrics.cohortTarget); setText(`card-${prefix}-ach`, metrics.cohortAch); setText(`card-${prefix}-pct`, metrics.achPct); setText(`card-${prefix}-revtgt`, metrics.revTarget); setText(`card-${prefix}-revach`, metrics.revAch); setText(`card-${prefix}-revpct`, metrics.revPct);
+    setTrend(`trend-${prefix}-ach`, metrics.achPctNum - 75); setTrend(`trend-${prefix}-rev`, metrics.revPctNum - 70);
+    setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-pct`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-rev`, metrics.revPctNum, progressColor(metrics.revPctNum)); setProgress(`prog-${prefix}-revpct`, metrics.revPctNum, progressColor(metrics.revPctNum));
+  }
 }
 
 function getLeaderBaseRows(chartKey) {

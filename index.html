@@ -87,29 +87,11 @@
           </select>
         </div>
 
-        <div class="kpi-cards-grid">
-          <!-- Cohort Target -->
-          <div class="kpi-card accent-indigo">
-            <div class="card-header-row">
-              <span class="card-label">Cohort Target</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="6" />
-                  <circle cx="12" cy="12" r="2" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tc-tgt">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Total enrollment target</span>
-            </div>
-          </div>
-
-          <!-- Cohort Achievement -->
+        <div class="kpi-cards-grid kpi-cards-grid--three">
+          <!-- Token Collected -->
           <div class="kpi-card accent-green">
             <div class="card-header-row">
-              <span class="card-label">Cohort Achievement</span>
+              <span class="card-label">Token Collected</span>
               <div class="card-icon">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -126,46 +108,6 @@
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-tc-ach" style="width: 0%"></div>
               </div>
-            </div>
-          </div>
-
-          <!-- Achievement % -->
-          <div class="kpi-card accent-teal">
-            <div class="card-header-row">
-              <span class="card-label">Achievement %</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tc-pct">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Average conversion rate</span>
-            </div>
-            <div class="card-progress-wrap">
-              <div class="card-progress-track">
-                <div class="card-progress-fill" id="prog-tc-pct" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Revenue Target -->
-          <div class="kpi-card accent-indigo">
-            <div class="card-header-row">
-              <span class="card-label">Revenue Target</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <line x1="12" y1="1" x2="12" y2="23" />
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tc-revtgt">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Aggregated revenue goals</span>
             </div>
           </div>
 
@@ -192,26 +134,22 @@
             </div>
           </div>
 
-          <!-- Revenue Achievement % -->
-          <div class="kpi-card accent-amber">
+          <!-- Average Token Per Person -->
+          <div class="kpi-card accent-teal">
             <div class="card-header-row">
-              <span class="card-label">Revenue Ach %</span>
+              <span class="card-label">Avg Token Per Person</span>
               <div class="card-icon">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <path
-                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
             </div>
-            <div class="card-value" id="card-tc-revpct">—</div>
+            <div class="card-value" id="card-tc-avgtoken">—</div>
             <div class="card-footer">
-              <span class="card-subtext">Average revenue quota met</span>
-            </div>
-            <div class="card-progress-wrap">
-              <div class="card-progress-track">
-                <div class="card-progress-fill" id="prog-tc-revpct" style="width: 0%"></div>
-              </div>
+              <span class="card-subtext">Present Active team size: <span id="card-tc-teamsize">—</span></span>
             </div>
           </div>
         </div>
@@ -229,29 +167,11 @@
           </select>
         </div>
 
-        <div class="kpi-cards-grid">
-          <!-- Cohort Target -->
-          <div class="kpi-card accent-indigo">
-            <div class="card-header-row">
-              <span class="card-label">Month Target</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="6" />
-                  <circle cx="12" cy="12" r="2" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tm-tgt">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Monthly target enrollment</span>
-            </div>
-          </div>
-
-          <!-- Cohort Achievement -->
+        <div class="kpi-cards-grid kpi-cards-grid--three">
+          <!-- Token Collected -->
           <div class="kpi-card accent-green">
             <div class="card-header-row">
-              <span class="card-label">Month Achievement</span>
+              <span class="card-label">Token Collected</span>
               <div class="card-icon">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -268,46 +188,6 @@
               <div class="card-progress-track">
                 <div class="card-progress-fill" id="prog-tm-ach" style="width: 0%"></div>
               </div>
-            </div>
-          </div>
-
-          <!-- Achievement % -->
-          <div class="kpi-card accent-teal">
-            <div class="card-header-row">
-              <span class="card-label">Achievement %</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <line x1="18" y1="20" x2="18" y2="10" />
-                  <line x1="12" y1="20" x2="12" y2="4" />
-                  <line x1="6" y1="20" x2="6" y2="14" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tm-pct">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Average conversion rate</span>
-            </div>
-            <div class="card-progress-wrap">
-              <div class="card-progress-track">
-                <div class="card-progress-fill" id="prog-tm-pct" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Revenue Target -->
-          <div class="kpi-card accent-indigo">
-            <div class="card-header-row">
-              <span class="card-label">Revenue Target</span>
-              <div class="card-icon">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <line x1="12" y1="1" x2="12" y2="23" />
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </div>
-            </div>
-            <div class="card-value" id="card-tm-revtgt">—</div>
-            <div class="card-footer">
-              <span class="card-subtext">Monthly target revenue</span>
             </div>
           </div>
 
@@ -334,26 +214,22 @@
             </div>
           </div>
 
-          <!-- Revenue Achievement % -->
-          <div class="kpi-card accent-amber">
+          <!-- Average Token Per Person -->
+          <div class="kpi-card accent-teal">
             <div class="card-header-row">
-              <span class="card-label">Revenue Ach %</span>
+              <span class="card-label">Avg Token Per Person</span>
               <div class="card-icon">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                  <path
-                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
             </div>
-            <div class="card-value" id="card-tm-revpct">—</div>
+            <div class="card-value" id="card-tm-avgtoken">—</div>
             <div class="card-footer">
-              <span class="card-subtext">Average monthly quota met</span>
-            </div>
-            <div class="card-progress-wrap">
-              <div class="card-progress-track">
-                <div class="card-progress-fill" id="prog-tm-revpct" style="width: 0%"></div>
-              </div>
+              <span class="card-subtext">Present Active team size: <span id="card-tm-teamsize">—</span></span>
             </div>
           </div>
         </div>
