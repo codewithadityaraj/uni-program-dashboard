@@ -26,7 +26,7 @@ const LEADER_CONFIG = {
 };
 
 let sheetData = { tokenCohort: [], tokenMonthly: [], fpCohort: [], fpMonthly: [], tlTokenCohort: [], tlTokenMonthly: [], tlFpCohort: [], tlFpMonthly: [], gmTokenCohort: [], gmTokenMonthly: [], gmFpCohort: [], gmFpMonthly: [], programs: [] };
-let activeProgram = '';
+let activeProgram = 'ALL';
 let dataReady = false;
 
 const sectionCohortFilters = { tc: 'ALL', fc: 'ALL' };
@@ -38,6 +38,15 @@ const leaderSorts = { 'tl-tc': 'pct-desc', 'tl-tm': 'pct-desc', 'tl-fc': 'ach-de
 
 function displayRaw(v) { if (v == null) return '—'; const s = String(v).trim(); return s || '—'; }
 function fmtNumExact(n) { if (n == null || Number.isNaN(n)) return '—'; if (Number.isInteger(n)) return n.toLocaleString('en-IN'); return n.toLocaleString('en-IN', { maximumFractionDigits: 20 }); }
+function formatPerHead(val) {
+  const n = parseNum(val);
+  if (!Number.isFinite(n)) return displayRaw(val);
+  return n.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+function formatPctRounded(pctNum, decimals) {
+  if (pctNum == null || !Number.isFinite(pctNum)) return '—';
+  return pctNum.toFixed(decimals) + '%';
+}
 function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
 function progressColor(p) { if (p >= 90) return 'accent-green'; if (p >= 70) return 'accent-amber'; return 'accent-red'; }
 function trendClass(v) { return v >= 0 ? 'up' : 'down'; }
@@ -78,7 +87,10 @@ async function fetchDashboard(forceRefresh) {
 }
 
 function getDatasetRows(datasetKey) { return sheetData[datasetKey] || []; }
-function filterRowsByProgram(rows) { if (!activeProgram) return []; return rows.filter((r) => rowProgram(r) === activeProgram); }
+function filterRowsByProgram(rows) {
+  if (!activeProgram || activeProgram === 'ALL') return rows;
+  return rows.filter((r) => rowProgram(r) === activeProgram);
+}
 
 function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
 function setProgress(id, pctVal, colorClass) { const el = document.getElementById(id); if (!el) return; el.style.width = clamp(pctVal, 0, 100) + '%'; el.className = `card-progress-fill ${colorClass}`; }
@@ -145,14 +157,14 @@ function renderCardsSection(prefix) {
 
     let perHeadValue = '—';
     if (rows.length === 1) {
-      perHeadValue = displayRaw(rows[0][perHeadField]);
+      perHeadValue = formatPerHead(rows[0][perHeadField]);
     } else {
       const validPerHeadNums = rows
         .map((row) => parseNum(row[perHeadField]))
         .filter((n) => Number.isFinite(n) && n > 0);
       if (validPerHeadNums.length) {
         const perHeadAvg = validPerHeadNums.reduce((acc, n) => acc + n, 0) / validPerHeadNums.length;
-        perHeadValue = fmtNumExact(perHeadAvg);
+        perHeadValue = formatPerHead(perHeadAvg);
       }
     }
 
@@ -166,7 +178,12 @@ function renderCardsSection(prefix) {
     setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum));
     setProgress(`prog-${prefix}-rev`, metrics.revPctNum, progressColor(metrics.revPctNum));
   } else {
-    setText(`card-${prefix}-tgt`, metrics.cohortTarget); setText(`card-${prefix}-ach`, metrics.cohortAch); setText(`card-${prefix}-pct`, metrics.achPct); setText(`card-${prefix}-revtgt`, metrics.revTarget); setText(`card-${prefix}-revach`, metrics.revAch); setText(`card-${prefix}-revpct`, metrics.revPct);
+    setText(`card-${prefix}-tgt`, metrics.cohortTarget);
+    setText(`card-${prefix}-ach`, metrics.cohortAch);
+    setText(`card-${prefix}-pct`, formatPctRounded(metrics.achPctNum, 2));
+    setText(`card-${prefix}-revtgt`, metrics.revTarget);
+    setText(`card-${prefix}-revach`, metrics.revAch);
+    setText(`card-${prefix}-revpct`, formatPctRounded(metrics.revPctNum, 2));
     setTrend(`trend-${prefix}-ach`, metrics.achPctNum - 75); setTrend(`trend-${prefix}-rev`, metrics.revPctNum - 70);
     setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-pct`, metrics.achPctNum, progressColor(metrics.achPctNum)); setProgress(`prog-${prefix}-rev`, metrics.revPctNum, progressColor(metrics.revPctNum)); setProgress(`prog-${prefix}-revpct`, metrics.revPctNum, progressColor(metrics.revPctNum));
   }
@@ -246,9 +263,14 @@ function populateProgramDropdown() {
   const select = document.getElementById('program-filter');
   if (!select) return;
   const programs = sheetData.programs || [];
-  select.innerHTML = programs.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
-  if (programs.includes(activeProgram)) select.value = activeProgram;
-  else if (programs.length) { activeProgram = programs[0]; select.value = activeProgram; }
+  select.innerHTML =
+    '<option value="ALL">All Programs</option>' +
+    programs.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+  if (activeProgram === 'ALL' || programs.includes(activeProgram)) select.value = activeProgram;
+  else if (programs.length) {
+    activeProgram = 'ALL';
+    select.value = 'ALL';
+  }
 }
 
 function syncSectionDropdowns() {
