@@ -1,3 +1,12 @@
+body.is-loading {
+  cursor: wait;
+}
+
+body.is-loading .dashboard-wrapper {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 /* ══════════════════════════════════════════════════
    UNI PROGRAM DASHBOARD — Premium Design System
    ══════════════════════════════════════════════════ */
@@ -634,6 +643,13 @@ html.dark .sticky-header {
   align-items: center;
 }
 
+.leader-slim-track-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .leader-slim-track {
   height: 6px;
   background: var(--border);
@@ -646,6 +662,22 @@ html.dark .sticky-header {
 html.dark .leader-slim-track {
   background: #1f293d;
 }
+
+.leader-scale-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: 100%;
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  line-height: 1;
+}
+
+.leader-scale-row span:nth-child(1) { text-align: left; }
+.leader-scale-row span:nth-child(2),
+.leader-scale-row span:nth-child(3),
+.leader-scale-row span:nth-child(4) { text-align: center; }
+.leader-scale-row span:nth-child(5) { text-align: right; }
 
 .leader-slim-fill {
   height: 100%;
