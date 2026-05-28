@@ -8,8 +8,8 @@
 const API_BASE = '';
 
 const SECTION_CONFIG = {
-  tc: { dataset: 'tokenCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-tc-cohort', allLabel: 'All Cohorts', teamSizeField: 'Present Active Team Size', fields: { cohortTarget: 'Cohort Token Target', cohortAch: 'Cohort Token Achieved', achPct: 'Cohort Token Achievement %', revTarget: 'Cohort Token Revenue Target', revAch: 'Cohort Token Revenue Achieved', revPct: 'Cohort Token Revenue Achievement %' } },
-  tm: { dataset: 'tokenMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-tm-month', allLabel: 'All Months', teamSizeField: 'Present Active Team Size', fields: { cohortTarget: 'Month Token Target', cohortAch: 'Month Token Achieved', achPct: 'Month Token Achievement %', revTarget: 'Month Token Target Revenue', revAch: 'Month Token Revenue Achievement', revPct: 'Month Token Revenue Achievement %' } },
+  tc: { dataset: 'tokenCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-tc-cohort', allLabel: 'All Cohorts', perHeadField: 'Cohort Per Head Token', teamSizeField: 'Cohort Team Size', fields: { cohortTarget: 'Cohort Token Target', cohortAch: 'Cohort Token Achieved', achPct: 'Cohort Token Achievement %', revTarget: 'Cohort Token Revenue Target', revAch: 'Cohort Token Revenue Achieved', revPct: 'Cohort Token Revenue Achievement %' } },
+  tm: { dataset: 'tokenMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-tm-month', allLabel: 'All Months', perHeadField: 'Month Per Head Token', teamSizeField: 'Month Team Size', fields: { cohortTarget: 'Month Token Target', cohortAch: 'Month Token Achieved', achPct: 'Month Token Achievement %', revTarget: 'Month Token Target Revenue', revAch: 'Month Token Revenue Achievement', revPct: 'Month Token Revenue Achievement %' } },
   fc: { dataset: 'fpCohort', dimField: 'cohort', dimColumn: 'Cohort Name', selectId: 'select-sec-fc-cohort', allLabel: 'All Cohorts', fields: { cohortTarget: 'Cohort Enrollment Target', cohortAch: 'Cohort Enrollment Acheived', achPct: 'Cohort Enrollment Acheivement %', revTarget: 'Cohort Enrollment Revenue Target', revAch: 'Cohort Enrollment Revenue Acheived', revPct: 'Cohort Enrollment Revenue Acheivement %' } },
   fm: { dataset: 'fpMonthly', dimField: 'month', dimColumn: 'Month', selectId: 'select-sec-fm-month', allLabel: 'All Months', fields: { cohortTarget: 'Month Enrollment Target', cohortAch: 'Month Enrollment Acheived', achPct: 'Month Enrollment Acheivement %', revTarget: 'Month Enrollment Revenue Target', revAch: 'Month Enrollment Revenue Acheived', revPct: 'Month Enrollment Revenue Acheivement %' } },
 };
@@ -140,18 +140,27 @@ function renderCardsSection(prefix) {
   const metrics = rows.length === 1 ? metricsFromSingleRow(rows[0], config.fields) : aggregateRows(rows, config.fields);
 
   if (isTokenSection) {
-    // Compute team size and avg token per person
-    const teamSizeField = config.teamSizeField || 'Present Active Team Size';
-    let teamSize = 0;
-    rows.forEach((row) => { teamSize += parseNum(row[teamSizeField]); });
-    // If the sheet stores a single (non-aggregated) team size, use the last row's value instead of sum
-    // Use sum here (can be adjusted if the sheet has a single value per filter)
-    const cohortAchNum = rows.reduce((acc, row) => acc + parseNum(row[config.fields.cohortAch]), 0);
-    const avgToken = teamSize > 0 ? (cohortAchNum / teamSize) : 0;
+    const perHeadField = config.perHeadField;
+    const teamSizeField = config.teamSizeField;
+
+    let perHeadValue = '—';
+    if (rows.length === 1) {
+      perHeadValue = displayRaw(rows[0][perHeadField]);
+    } else {
+      const validPerHeadNums = rows
+        .map((row) => parseNum(row[perHeadField]))
+        .filter((n) => Number.isFinite(n) && n > 0);
+      if (validPerHeadNums.length) {
+        const perHeadAvg = validPerHeadNums.reduce((acc, n) => acc + n, 0) / validPerHeadNums.length;
+        perHeadValue = fmtNumExact(perHeadAvg);
+      }
+    }
+
+    const teamSize = rows.reduce((acc, row) => acc + parseNum(row[teamSizeField]), 0);
 
     setText(`card-${prefix}-ach`, metrics.cohortAch);
     setText(`card-${prefix}-revach`, metrics.revAch);
-    setText(`card-${prefix}-avgtoken`, teamSize > 0 ? fmtNumExact(parseFloat(avgToken.toFixed(2))) : '—');
+    setText(`card-${prefix}-avgtoken`, perHeadValue);
     setText(`card-${prefix}-teamsize`, teamSize > 0 ? fmtNumExact(teamSize) : '—');
     setTrend(`trend-${prefix}-ach`, metrics.achPctNum - 75); setTrend(`trend-${prefix}-rev`, metrics.revPctNum - 70);
     setProgress(`prog-${prefix}-ach`, metrics.achPctNum, progressColor(metrics.achPctNum));
