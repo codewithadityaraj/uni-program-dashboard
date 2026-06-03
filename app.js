@@ -362,9 +362,56 @@ function syncSectionDropdowns() {
   ['tm', 'fm'].forEach((prefix) => { const cfg = SECTION_CONFIG[prefix]; populateSelect(cfg.selectId, uniqueSorted(filterRowsByProgram(getDatasetRows(cfg.dataset)).map((r) => rowDim(r, cfg.dimColumn))), cfg.allLabel); sectionMonthFilters[prefix] = document.getElementById(cfg.selectId).value; });
 }
 
+/* ── LEADERSHIP BANNER RENDER ────────────────────── */
+function getInitials(name) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return '?';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
+function renderLeadershipBanner() {
+  const gmContainer = document.getElementById('banner-gm-names');
+  const tlContainer = document.getElementById('banner-tl-names');
+  if (!gmContainer || !tlContainer) return;
+
+  // Derive GM names from gmTokenCohort rows
+  const gmRows = filterRowsByProgram(getDatasetRows('gmTokenCohort'));
+  const gmNameCols = ['GM NAME', 'GM Name'];
+  const gmNames = [];
+  gmRows.forEach((r) => {
+    for (const col of gmNameCols) {
+      const v = (r[col] || '').trim();
+      if (v && !gmNames.includes(v)) { gmNames.push(v); break; }
+    }
+  });
+
+  // Derive TL names from tlTokenCohort rows
+  const tlRows = filterRowsByProgram(getDatasetRows('tlTokenCohort'));
+  const tlNames = [];
+  tlRows.forEach((r) => {
+    const v = (r['TL NAME'] || '').trim();
+    if (v && !tlNames.includes(v)) tlNames.push(v);
+  });
+
+  function buildChips(names, chipClass) {
+    if (!names.length) {
+      return `<span class="leader-name-chip placeholder ${chipClass}">Not assigned</span>`;
+    }
+    return names.map((name) => {
+      const initials = getInitials(name);
+      return `<span class="leader-name-chip ${chipClass}" data-initials="${escapeHtml(initials)}"><span>${escapeHtml(name)}</span></span>`;
+    }).join('');
+  }
+
+  gmContainer.innerHTML = buildChips(gmNames, 'gm-chip');
+  tlContainer.innerHTML = buildChips(tlNames, 'tl-chip');
+}
+
 function render() {
   renderCardsSection('tc'); renderCardsSection('tm'); renderCardsSection('fc'); renderCardsSection('fm');
   LEADER_CHART_KEYS.forEach(renderLeaderList);
+  renderLeadershipBanner();
 }
 
 function updateLastUpdated() {
