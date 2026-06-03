@@ -5,6 +5,7 @@ Fetches Google Sheets CSV exports, caches responses (5 min TTL), serves the stat
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import time
@@ -56,17 +57,44 @@ SHEETS: dict[str, str] = {
     "gm-fp-monthly": (
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1051256120&single=true&output=csv"
     ),
+    "bda-token-cohort": (
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=312446060&single=true&output=csv"
+    ),
+    "bda-token-monthly": (
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=454256125&single=true&output=csv"
+    ),
+    "bda-fp-cohort": (
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1252658296&single=true&output=csv"
+    ),
+    "bda-fp-monthly": (
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1981205156&single=true&output=csv"
+    ),
 }
 
 _cache: dict[str, tuple[float, list[dict[str, str]]]] = {}
 
 
 def _parse_csv(text: str) -> list[dict[str, str]]:
+    """Parse CSV; when headers repeat (e.g. two 'Program Name' cols), keep the first."""
     text = text.lstrip("\ufeff")
-    reader = csv.DictReader(io.StringIO(text))
+    raw_reader = csv.reader(io.StringIO(text))
+    try:
+        header_row = next(raw_reader)
+    except StopIteration:
+        return []
+
+    headers = [h.strip() for h in header_row]
     rows: list[dict[str, str]] = []
-    for row in reader:
-        cleaned = {k.strip(): (v.strip() if v else "") for k, v in row.items() if k}
+    for line in raw_reader:
+        if not any((cell or "").strip() for cell in line):
+            continue
+        cleaned: dict[str, str] = {}
+        for idx, header in enumerate(headers):
+            if not header:
+                continue
+            val = (line[idx].strip() if idx < len(line) else "")
+            if header not in cleaned:
+                cleaned[header] = val
         if any(cleaned.values()):
             rows.append(cleaned)
     return rows
@@ -125,18 +153,41 @@ async def get_dataset(dataset: str):
 
 @app.get("/api/dashboard")
 async def get_dashboard():
-    token_cohort = await _fetch_sheet("token-cohort")
-    token_monthly = await _fetch_sheet("token-monthly")
-    fp_cohort = await _fetch_sheet("fp-cohort")
-    fp_monthly = await _fetch_sheet("fp-monthly")
-    tl_token_cohort = await _fetch_sheet("tl-token-cohort")
-    tl_token_monthly = await _fetch_sheet("tl-token-monthly")
-    tl_fp_cohort = await _fetch_sheet("tl-fp-cohort")
-    tl_fp_monthly = await _fetch_sheet("tl-fp-monthly")
-    gm_token_cohort = await _fetch_sheet("gm-token-cohort")
-    gm_token_monthly = await _fetch_sheet("gm-token-monthly")
-    gm_fp_cohort = await _fetch_sheet("gm-fp-cohort")
-    gm_fp_monthly = await _fetch_sheet("gm-fp-monthly")
+    (
+        token_cohort,
+        token_monthly,
+        fp_cohort,
+        fp_monthly,
+        tl_token_cohort,
+        tl_token_monthly,
+        tl_fp_cohort,
+        tl_fp_monthly,
+        gm_token_cohort,
+        gm_token_monthly,
+        gm_fp_cohort,
+        gm_fp_monthly,
+        bda_token_cohort,
+        bda_token_monthly,
+        bda_fp_cohort,
+        bda_fp_monthly,
+    ) = await asyncio.gather(
+        _fetch_sheet("token-cohort"),
+        _fetch_sheet("token-monthly"),
+        _fetch_sheet("fp-cohort"),
+        _fetch_sheet("fp-monthly"),
+        _fetch_sheet("tl-token-cohort"),
+        _fetch_sheet("tl-token-monthly"),
+        _fetch_sheet("tl-fp-cohort"),
+        _fetch_sheet("tl-fp-monthly"),
+        _fetch_sheet("gm-token-cohort"),
+        _fetch_sheet("gm-token-monthly"),
+        _fetch_sheet("gm-fp-cohort"),
+        _fetch_sheet("gm-fp-monthly"),
+        _fetch_sheet("bda-token-cohort"),
+        _fetch_sheet("bda-token-monthly"),
+        _fetch_sheet("bda-fp-cohort"),
+        _fetch_sheet("bda-fp-monthly"),
+    )
 
     programs = sorted(
         {r.get("Program Name", "") for r in token_cohort if r.get("Program Name")},
@@ -157,6 +208,10 @@ async def get_dashboard():
         "gmTokenMonthly": gm_token_monthly,
         "gmFpCohort": gm_fp_cohort,
         "gmFpMonthly": gm_fp_monthly,
+        "bdaTokenCohort": bda_token_cohort,
+        "bdaTokenMonthly": bda_token_monthly,
+        "bdaFpCohort": bda_fp_cohort,
+        "bdaFpMonthly": bda_fp_monthly,
         "fetchedAt": time.time(),
     }
 

@@ -23,18 +23,38 @@ const LEADER_CONFIG = {
   'gm-tm': { dataset: 'gmTokenMonthly', dimColumn: 'Month', dimState: 'month', target: 'GM Month Token Target', ach: 'GM Month Token Achievement', pct: 'GM Month Token Achievement %', color: 'color-token-monthly', nameColumns: ['GM NAME', 'GM Name'] },
   'gm-fc': { dataset: 'gmFpCohort', dimColumn: 'Cohort Name', dimState: 'cohort', target: 'GM Cohort Full Payment Target', ach: 'GM Cohort Full Payment Achieved', pct: 'GM Cohort Full Payment Achievement %', color: 'color-fp-cohort', nameColumns: ['GM NAME', 'GM Name'] },
   'gm-fm': { dataset: 'gmFpMonthly', dimColumn: 'Month', dimState: 'month', target: 'GM Month Full Payment Target', ach: 'GM Month Full Payment Achieved', pct: 'GM Month Full Payment Achievement %', color: 'color-fp-monthly', nameColumns: ['GM NAME', 'GM Name'] },
+  'bda-tc': { dataset: 'bdaTokenCohort', dimColumn: 'Cohort Name', dimState: 'cohort', target: 'BDA Cohort Token Target', ach: 'BDA Cohort Token Achievement', pct: 'BDA Cohort Token Achievement %', color: 'color-token-cohort', nameColumns: ['BD MAIL', 'BDA MAIL', 'BD Mail'] },
+  'bda-tm': { dataset: 'bdaTokenMonthly', dimColumn: 'Month', dimState: 'month', target: 'BDA Month Token Target', ach: 'BDA Month Token Achievement', pct: 'BDA Month Token Achievement %', color: 'color-token-monthly', nameColumns: ['BD MAIL', 'BDA MAIL', 'BD Mail'] },
+  'bda-fc': { dataset: 'bdaFpCohort', dimColumn: 'Cohort Name', dimState: 'cohort', target: 'BDA Cohort Full Payment Target', ach: 'BDA Cohort Full Payment Achieved', pct: 'BDA Cohort Full Payment Achievement %', color: 'color-fp-cohort', nameColumns: ['BD MAIL', 'BDA MAIL', 'BD Mail'] },
+  'bda-fm': { dataset: 'bdaFpMonthly', dimColumn: 'Month', dimState: 'month', target: 'BDA Month Full Payment Target', ach: 'BDA Month Full Payment Achieved', pct: 'BDA Month Full Payment Achievement %', color: 'color-fp-monthly', nameColumns: ['BD MAIL', 'BDA MAIL', 'BD Mail'] },
 };
 
-let sheetData = { tokenCohort: [], tokenMonthly: [], fpCohort: [], fpMonthly: [], tlTokenCohort: [], tlTokenMonthly: [], tlFpCohort: [], tlFpMonthly: [], gmTokenCohort: [], gmTokenMonthly: [], gmFpCohort: [], gmFpMonthly: [], programs: [] };
+const LEADER_CHART_KEYS = [
+  'tl-tc', 'tl-tm', 'tl-fc', 'tl-fm',
+  'gm-tc', 'gm-tm', 'gm-fc', 'gm-fm',
+  'bda-tc', 'bda-tm', 'bda-fc', 'bda-fm',
+];
+
+let sheetData = {
+  tokenCohort: [], tokenMonthly: [], fpCohort: [], fpMonthly: [],
+  tlTokenCohort: [], tlTokenMonthly: [], tlFpCohort: [], tlFpMonthly: [],
+  gmTokenCohort: [], gmTokenMonthly: [], gmFpCohort: [], gmFpMonthly: [],
+  bdaTokenCohort: [], bdaTokenMonthly: [], bdaFpCohort: [], bdaFpMonthly: [],
+  programs: [],
+};
 let activeProgram = 'ALL';
 let dataReady = false;
 
 const sectionCohortFilters = { tc: 'ALL', fc: 'ALL' };
 const sectionMonthFilters = { tm: 'ALL', fm: 'ALL' };
-const leaderFilters = { 'tl-tc': 'ALL', 'tl-tm': 'ALL', 'tl-fc': 'ALL', 'tl-fm': 'ALL', 'gm-tc': 'ALL', 'gm-tm': 'ALL', 'gm-fc': 'ALL', 'gm-fm': 'ALL' };
-const leaderCohortFilters = { 'tl-tc': 'ALL', 'tl-fc': 'ALL', 'gm-tc': 'ALL', 'gm-fc': 'ALL' };
-const leaderMonthFilters = { 'tl-tm': 'ALL', 'tl-fm': 'ALL', 'gm-tm': 'ALL', 'gm-fm': 'ALL' };
-const leaderSorts = { 'tl-tc': 'pct-desc', 'tl-tm': 'pct-desc', 'tl-fc': 'ach-desc', 'tl-fm': 'ach-desc', 'gm-tc': 'pct-desc', 'gm-tm': 'pct-desc', 'gm-fc': 'ach-desc', 'gm-fm': 'ach-desc' };
+const leaderFilters = Object.fromEntries(LEADER_CHART_KEYS.map((k) => [k, 'ALL']));
+const leaderCohortFilters = Object.fromEntries(LEADER_CHART_KEYS.filter((k) => k.endsWith('-tc') || k.endsWith('-fc')).map((k) => [k, 'ALL']));
+const leaderMonthFilters = Object.fromEntries(LEADER_CHART_KEYS.filter((k) => k.endsWith('-tm') || k.endsWith('-fm')).map((k) => [k, 'ALL']));
+const leaderSorts = {
+  'tl-tc': 'pct-desc', 'tl-tm': 'pct-desc', 'tl-fc': 'ach-desc', 'tl-fm': 'ach-desc',
+  'gm-tc': 'pct-desc', 'gm-tm': 'pct-desc', 'gm-fc': 'ach-desc', 'gm-fm': 'ach-desc',
+  'bda-tc': 'pct-desc', 'bda-tm': 'pct-desc', 'bda-fc': 'ach-desc', 'bda-fm': 'ach-desc',
+};
 
 function displayRaw(v) { if (v == null) return '—'; const s = String(v).trim(); return s || '—'; }
 function fmtNumExact(n) { if (n == null || Number.isNaN(n)) return '—'; if (Number.isInteger(n)) return n.toLocaleString('en-IN'); return n.toLocaleString('en-IN', { maximumFractionDigits: 20 }); }
@@ -63,6 +83,11 @@ function rowLeader(row, cfg) {
     if (val) return val;
   }
   return '';
+}
+function leaderAllLabel(chartKey, kind) {
+  if (kind === 'person') return chartKey.startsWith('bda-') ? 'All BDAs' : chartKey.startsWith('gm-') ? 'All GMs' : 'All TLs';
+  if (kind === 'cohort') return 'All Cohorts';
+  return 'All Months';
 }
 function uniqueSorted(values) { return [...new Set(values.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), undefined, { sensitivity: 'base' })); }
 function escapeHtml(str) { return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -102,7 +127,6 @@ function populateSelect(selectId, values, allLabel) {
   const current = select.value;
   select.innerHTML = ['<option value="ALL">' + allLabel + '</option>'].concat(values.map((v) => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`)).join('');
   if (current === 'ALL' || values.includes(current)) select.value = current;
-  else if (values.length) select.value = values[0];
   else select.value = 'ALL';
 }
 
@@ -227,17 +251,61 @@ function syncLeaderDropdowns(chartKey) {
   const allProgramRows = filterRowsByProgram(getDatasetRows(cfg.dataset)).filter((r) => rowLeader(r, cfg));
   const dimValues = uniqueSorted(allProgramRows.map((r) => rowDim(r, cfg.dimColumn)));
   if (cfg.dimState === 'cohort') {
-    populateSelect(`select-${chartKey}-cohort`, dimValues, 'Select Cohort');
-    leaderCohortFilters[chartKey] = document.getElementById(`select-${chartKey}-cohort`).value;
+    populateSelect(`select-${chartKey}-cohort`, dimValues, leaderAllLabel(chartKey, 'cohort'));
+    leaderCohortFilters[chartKey] = document.getElementById(`select-${chartKey}-cohort`).value || 'ALL';
   } else {
-    populateSelect(`select-${chartKey}-month`, dimValues, 'Select Month');
-    leaderMonthFilters[chartKey] = document.getElementById(`select-${chartKey}-month`).value;
+    populateSelect(`select-${chartKey}-month`, dimValues, leaderAllLabel(chartKey, 'month'));
+    leaderMonthFilters[chartKey] = document.getElementById(`select-${chartKey}-month`).value || 'ALL';
   }
   const filteredRows = getLeaderBaseRows(chartKey);
   const leaderValues = uniqueSorted(filteredRows.map((r) => rowLeader(r, cfg)));
-  const roleLabel = chartKey.startsWith('gm-') ? 'Select GM' : 'Select TL';
-  populateSelect(`select-${chartKey}`, leaderValues, roleLabel);
+  populateSelect(`select-${chartKey}`, leaderValues, leaderAllLabel(chartKey, 'person'));
   leaderFilters[chartKey] = document.getElementById(`select-${chartKey}`).value;
+}
+
+function buildLeaderListItems(rows, cfg, chartKey) {
+  if (chartKey.startsWith('bda-')) {
+    return rows.map((r) => {
+      const pctFromSheet = parsePct(r[cfg.pct]);
+      const target = parseNum(r[cfg.target]);
+      const ach = parseNum(r[cfg.ach]);
+      const pctNum = pctFromSheet != null ? pctFromSheet : (target ? (ach / target) * 100 : 0);
+      return {
+        name: rowLeader(r, cfg),
+        target,
+        ach,
+        targetText: displayRaw(r[cfg.target]),
+        achText: displayRaw(r[cfg.ach]),
+        pctText: displayRaw(r[cfg.pct]) !== '—' ? displayRaw(r[cfg.pct]) : formatPctRounded(pctNum, 2),
+        pctNum,
+      };
+    });
+  }
+
+  const map = {};
+  rows.forEach((r) => {
+    const name = rowLeader(r, cfg);
+    if (!map[name]) map[name] = { name, target: 0, ach: 0, rowCount: 0, sheetPct: null };
+    map[name].target += parseNum(r[cfg.target]);
+    map[name].ach += parseNum(r[cfg.ach]);
+    map[name].rowCount += 1;
+    if (map[name].rowCount === 1) map[name].sheetPct = r[cfg.pct];
+  });
+
+  return Object.values(map).map((x) => {
+    const pctNum = x.target ? (x.ach / x.target) * 100 : 0;
+    const pctText =
+      x.rowCount === 1 && displayRaw(x.sheetPct) !== '—' ? displayRaw(x.sheetPct) : formatPctRounded(pctNum, 2);
+    return {
+      name: x.name,
+      target: x.target,
+      ach: x.ach,
+      targetText: fmtNumExact(x.target),
+      achText: fmtNumExact(x.ach),
+      pctText,
+      pctNum: x.rowCount === 1 && parsePct(x.sheetPct) != null ? parsePct(x.sheetPct) : pctNum,
+    };
+  });
 }
 
 function renderLeaderList(chartKey) {
@@ -248,14 +316,7 @@ function renderLeaderList(chartKey) {
   const leaderFilter = leaderFilters[chartKey];
   if (leaderFilter && leaderFilter !== 'ALL') rows = rows.filter((r) => rowLeader(r, cfg) === leaderFilter);
 
-  const map = {};
-  rows.forEach((r) => {
-    const name = rowLeader(r, cfg);
-    if (!map[name]) map[name] = { name, target: 0, ach: 0 };
-    map[name].target += parseNum(r[cfg.target]);
-    map[name].ach += parseNum(r[cfg.ach]);
-  });
-  let list = Object.values(map).map((x) => ({ ...x, pctNum: x.target ? (x.ach / x.target) * 100 : 0 }));
+  let list = buildLeaderListItems(rows, cfg, chartKey);
 
   const sortVal = leaderSorts[chartKey] || 'pct-desc';
   list.sort((a, b) => {
@@ -272,12 +333,12 @@ function renderLeaderList(chartKey) {
 
   listContainer.innerHTML = list.map((item) => {
     const pctRaw = Number.isFinite(item.pctNum) ? item.pctNum : 0;
-    const pctNum = clamp(pctRaw, 0, 100);
-    const pctText = pctRaw.toFixed(1) + '%';
+    const barWidth = clamp(pctRaw, 0, 100);
+    const badgeClass = pctRaw >= 90 ? 'green' : pctRaw >= 70 ? 'amber' : 'red';
     return `<div class="leader-progress-row">
       <div class="leader-row-name-wrap"><span class="leader-row-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span></div>
-      <div class="leader-row-bar-container"><div class="leader-slim-track-wrap"><div class="leader-slim-track"><div class="leader-slim-fill ${cfg.color}" style="width:${pctNum}%;transition:width .45s ease"></div></div><div class="leader-scale-row"><span>0</span><span>20</span><span>40</span><span>60</span><span>100</span></div></div></div>
-      <div class="leader-row-values">${fmtNumExact(item.ach)} / ${fmtNumExact(item.target)} <span class="leader-row-pct-badge ${pctNum >= 90 ? 'green' : pctNum >= 70 ? 'amber' : 'red'}">${pctText}</span></div>
+      <div class="leader-row-bar-container"><div class="leader-slim-track-wrap"><div class="leader-slim-track"><div class="leader-slim-fill ${cfg.color}" style="width:${barWidth}%;transition:width .45s ease"></div></div><div class="leader-scale-row"><span>0</span><span>20</span><span>40</span><span>60</span><span>100</span></div></div></div>
+      <div class="leader-row-values">${escapeHtml(item.achText)} / ${escapeHtml(item.targetText)} <span class="leader-row-pct-badge ${badgeClass}">${escapeHtml(item.pctText)}</span></div>
     </div>`;
   }).join('');
 }
@@ -303,7 +364,7 @@ function syncSectionDropdowns() {
 
 function render() {
   renderCardsSection('tc'); renderCardsSection('tm'); renderCardsSection('fc'); renderCardsSection('fm');
-  ['tl-tc', 'tl-tm', 'tl-fc', 'tl-fm', 'gm-tc', 'gm-tm', 'gm-fc', 'gm-fm'].forEach(renderLeaderList);
+  LEADER_CHART_KEYS.forEach(renderLeaderList);
 }
 
 function updateLastUpdated() {
@@ -316,13 +377,13 @@ function updateLastUpdated() {
 function onProgramChange(val) {
   activeProgram = val;
   sectionCohortFilters.tc = 'ALL'; sectionCohortFilters.fc = 'ALL'; sectionMonthFilters.tm = 'ALL'; sectionMonthFilters.fm = 'ALL';
-  ['tl-tc', 'tl-tm', 'tl-fc', 'tl-fm', 'gm-tc', 'gm-tm', 'gm-fc', 'gm-fm'].forEach((k) => {
+  LEADER_CHART_KEYS.forEach((k) => {
     leaderFilters[k] = 'ALL';
-    if (k.endsWith('c')) leaderCohortFilters[k] = 'ALL';
-    if (k.endsWith('m')) leaderMonthFilters[k] = 'ALL';
+    if (k.endsWith('-tc') || k.endsWith('-fc')) leaderCohortFilters[k] = 'ALL';
+    if (k.endsWith('-tm') || k.endsWith('-fm')) leaderMonthFilters[k] = 'ALL';
   });
   syncSectionDropdowns();
-  ['tl-tc', 'tl-tm', 'tl-fc', 'tl-fm', 'gm-tc', 'gm-tm', 'gm-fc', 'gm-fm'].forEach(syncLeaderDropdowns);
+  LEADER_CHART_KEYS.forEach(syncLeaderDropdowns);
   render();
 }
 
@@ -357,11 +418,21 @@ async function loadData(forceRefresh) {
   setLoading(true);
   try {
     const payload = await fetchDashboard(forceRefresh);
-    sheetData = { programs: payload.programs || [], tokenCohort: payload.tokenCohort || [], tokenMonthly: payload.tokenMonthly || [], fpCohort: payload.fpCohort || [], fpMonthly: payload.fpMonthly || [], tlTokenCohort: payload.tlTokenCohort || [], tlTokenMonthly: payload.tlTokenMonthly || [], tlFpCohort: payload.tlFpCohort || [], tlFpMonthly: payload.tlFpMonthly || [], gmTokenCohort: payload.gmTokenCohort || [], gmTokenMonthly: payload.gmTokenMonthly || [], gmFpCohort: payload.gmFpCohort || [], gmFpMonthly: payload.gmFpMonthly || [] };
+    sheetData = {
+      programs: payload.programs || [],
+      tokenCohort: payload.tokenCohort || [], tokenMonthly: payload.tokenMonthly || [],
+      fpCohort: payload.fpCohort || [], fpMonthly: payload.fpMonthly || [],
+      tlTokenCohort: payload.tlTokenCohort || [], tlTokenMonthly: payload.tlTokenMonthly || [],
+      tlFpCohort: payload.tlFpCohort || [], tlFpMonthly: payload.tlFpMonthly || [],
+      gmTokenCohort: payload.gmTokenCohort || [], gmTokenMonthly: payload.gmTokenMonthly || [],
+      gmFpCohort: payload.gmFpCohort || [], gmFpMonthly: payload.gmFpMonthly || [],
+      bdaTokenCohort: payload.bdaTokenCohort || [], bdaTokenMonthly: payload.bdaTokenMonthly || [],
+      bdaFpCohort: payload.bdaFpCohort || [], bdaFpMonthly: payload.bdaFpMonthly || [],
+    };
     dataReady = true;
     populateProgramDropdown();
     syncSectionDropdowns();
-    ['tl-tc', 'tl-tm', 'tl-fc', 'tl-fm', 'gm-tc', 'gm-tm', 'gm-fc', 'gm-fm'].forEach(syncLeaderDropdowns);
+    LEADER_CHART_KEYS.forEach(syncLeaderDropdowns);
     render();
     updateLastUpdated();
   } catch (err) {

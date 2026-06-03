@@ -25,6 +25,14 @@ const SHEETS = {
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1622927752&single=true&output=csv",
   gmFpMonthly:
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1051256120&single=true&output=csv",
+  bdaTokenCohort:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=312446060&single=true&output=csv",
+  bdaTokenMonthly:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=454256125&single=true&output=csv",
+  bdaFpCohort:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1252658296&single=true&output=csv",
+  bdaFpMonthly:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTcztb-A37i4VXvWKnATdaFrGPZGf5tQlsYIDgdb7CViBh_TpL0kdst-OVwlEBxISLK1fHob_G86ffr/pub?gid=1981205156&single=true&output=csv",
 };
 
 const cache = new Map();
@@ -81,7 +89,9 @@ function parseCsv(text) {
     const cols = parseCsvLine(lines[i]);
     const row = {};
     headers.forEach((header, idx) => {
-      row[header] = (cols[idx] || "").trim();
+      if (!header) return;
+      const val = (cols[idx] || "").trim();
+      if (!(header in row)) row[header] = val;
     });
     if (Object.values(row).some(Boolean)) rows.push(row);
   }
@@ -117,6 +127,10 @@ async function loadDashboard() {
     gmTokenMonthly,
     gmFpCohort,
     gmFpMonthly,
+    bdaTokenCohort,
+    bdaTokenMonthly,
+    bdaFpCohort,
+    bdaFpMonthly,
   ] = await Promise.all([
     fetchSheet("tokenCohort"),
     fetchSheet("tokenMonthly"),
@@ -130,6 +144,10 @@ async function loadDashboard() {
     fetchSheet("gmTokenMonthly"),
     fetchSheet("gmFpCohort"),
     fetchSheet("gmFpMonthly"),
+    fetchSheet("bdaTokenCohort"),
+    fetchSheet("bdaTokenMonthly"),
+    fetchSheet("bdaFpCohort"),
+    fetchSheet("bdaFpMonthly"),
   ]);
 
   const programs = [...new Set(tokenCohort.map((r) => (r["Program Name"] || "").trim()).filter(Boolean))].sort((a, b) =>
@@ -150,6 +168,10 @@ async function loadDashboard() {
     gmTokenMonthly,
     gmFpCohort,
     gmFpMonthly,
+    bdaTokenCohort,
+    bdaTokenMonthly,
+    bdaFpCohort,
+    bdaFpMonthly,
     fetchedAt: Date.now() / 1000,
   };
 }
