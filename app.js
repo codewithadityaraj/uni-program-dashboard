@@ -114,6 +114,29 @@ function getFilteredSectionRows(prefix) {
   return rows;
 }
 
+/** Single program: max headcount across rows. All programs: max per program, then sum those maxes. */
+function computeAggregateTeamSize(rows, teamSizeField) {
+  if (!rows.length) return 0;
+
+  if (activeProgram !== 'ALL') {
+    const sizes = rows.map((row) => parseNum(row[teamSizeField])).filter((n) => Number.isFinite(n));
+    return sizes.length ? Math.max(...sizes) : 0;
+  }
+
+  const maxByProgram = {};
+  rows.forEach((row) => {
+    const program = rowProgram(row);
+    if (!program) return;
+    const size = parseNum(row[teamSizeField]);
+    if (!Number.isFinite(size)) return;
+    if (maxByProgram[program] == null || size > maxByProgram[program]) {
+      maxByProgram[program] = size;
+    }
+  });
+
+  return Object.values(maxByProgram).reduce((acc, n) => acc + n, 0);
+}
+
 function aggregateRows(rows, fields) {
   let cohortTarget = 0; let cohortAch = 0; let revTarget = 0; let revAch = 0;
   rows.forEach((row) => { cohortTarget += parseNum(row[fields.cohortTarget]); cohortAch += parseNum(row[fields.cohortAch]); revTarget += parseNum(row[fields.revTarget]); revAch += parseNum(row[fields.revAch]); });
@@ -168,7 +191,7 @@ function renderCardsSection(prefix) {
       }
     }
 
-    const teamSize = rows.reduce((acc, row) => acc + parseNum(row[teamSizeField]), 0);
+    const teamSize = computeAggregateTeamSize(rows, teamSizeField);
 
     setText(`card-${prefix}-ach`, metrics.cohortAch);
     setText(`card-${prefix}-revach`, metrics.revAch);
